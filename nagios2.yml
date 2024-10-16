@@ -1,0 +1,47 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: install updates (CentOS)
+    tags: always
+    dnf:
+      update: dist
+      update_cache: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: install updates (Ubuntu)
+    tags: always
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: workstations
+  become: true
+  tasks:
+  
+  - name: Install EPEL Repo (prereq)
+    dnf:
+      name: epel-release
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: install Nagios (CentOS)
+    dnf:
+      name: nagios
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: install Nagios (Ubuntu)
+    apt:
+      name: nagios3
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Start Nagios (CentOS)
+    service:
+      name: nagios
+      state: restarted
+      enabled: true
